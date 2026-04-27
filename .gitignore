@@ -1,5 +1,8 @@
 debug/
 target/
+dist/
+manifests/
+scripts/
 Cargo.lock
 
 .idea

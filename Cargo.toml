@@ -1,6 +1,6 @@
 [package]
 name = "win-taskbar-util"
-description = "Command line utility for completely hiding and showing Windows taskbar"
+description = "Command line utility for completely hiding Windows native taskbar"
 version = "1.0.0"
 edition = "2024"
 authors = ["franmatesic"]
