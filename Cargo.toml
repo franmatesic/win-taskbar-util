@@ -1,0 +1,18 @@
+[package]
+name = "win-taskbar-util"
+description = "Command line utility for completely hiding and showing Windows taskbar"
+version = "1.0.0"
+edition = "2024"
+authors = ["franmatesic"]
+license = "MIT"
+
+[profile.release]
+opt-level = 3
+
+[dependencies]
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Threading"
+] }

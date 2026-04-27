@@ -1,0 +1,11 @@
+debug/
+target/
+Cargo.lock
+
+.idea
+.vscode
+*.iml
+
+.env
+.env.*
+!.env.example
