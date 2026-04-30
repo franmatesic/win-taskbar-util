@@ -12,8 +12,8 @@ wintaskbarutil hide
 wintaskbarutil status
 wintaskbarutil version
 wintaskbarutil help
-wintaskbarutil autostart on
-wintaskbarutil autostart off
+wintaskbarutil autostart enable
+wintaskbarutil autostart disable
 wintaskbarutil autostart status
 ```
 

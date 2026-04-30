@@ -105,7 +105,7 @@ fn cmd_show() -> Result<(), Box<dyn Error>> {
         remove_pid_file();
     }
 
-    let old_state = read_saved_appbar_state().unwrap_or(ABS_ALWAYSONTOP as u32);
+    let old_state = read_saved_appbar_state().unwrap_or(ABS_ALWAYSONTOP);
 
     restore_taskbar(old_state);
     remove_state_file();
@@ -122,8 +122,8 @@ fn cmd_status() -> Result<(), Box<dyn Error>> {
     let autostart = autostart_is_enabled()?;
 
     println!("Status:");
-    println!("  taskbar hidden: {}", yes_no(taskbar_hidden));
-    println!("  daemon running: {}", yes_no(daemon_running));
+    println!("  taskbar hidden: {}", enabled_or_disabled(taskbar_hidden));
+    println!("  daemon running: {}", enabled_or_disabled(daemon_running));
 
     if let Some(pid) = pid {
         println!("  daemon pid: {pid}");
@@ -131,7 +131,7 @@ fn cmd_status() -> Result<(), Box<dyn Error>> {
         println!("  daemon pid: none");
     }
 
-    println!("  autostart: {}", yes_no(autostart));
+    println!("  autostart: {}", enabled_or_disabled(autostart));
 
     Ok(())
 }
@@ -139,8 +139,8 @@ fn cmd_status() -> Result<(), Box<dyn Error>> {
 fn cmd_autostart(args: &[OsString]) -> Result<(), Box<dyn Error>> {
     if args.is_empty() {
         println!("Usage:");
-        println!("  {ROOT_COMMAND} autostart on");
-        println!("  {ROOT_COMMAND} autostart off");
+        println!("  {ROOT_COMMAND} autostart enable");
+        println!("  {ROOT_COMMAND} autostart disable");
         println!("  {ROOT_COMMAND} autostart status");
         return Ok(());
     }
@@ -148,18 +148,21 @@ fn cmd_autostart(args: &[OsString]) -> Result<(), Box<dyn Error>> {
     let subcommand = args[0].to_string_lossy().to_string();
 
     match subcommand.as_str() {
-        "on" | "enable" => {
+        "enable" => {
             enable_autostart()?;
             println!("Autostart enabled.");
             Ok(())
         }
-        "off" | "disable" => {
+        "disable" => {
             disable_autostart()?;
             println!("Autostart disabled.");
             Ok(())
         }
         "status" => {
-            println!("Autostart: {}", yes_no(autostart_is_enabled()?));
+            println!(
+                "Autostart: {}",
+                enabled_or_disabled(autostart_is_enabled()?)
+            );
             Ok(())
         }
         other => Err(format!("Unknown autostart command: {other}").into()),
@@ -179,7 +182,7 @@ fn daemon_main() -> Result<(), Box<dyn Error>> {
 }
 
 fn suppress_taskbar() {
-    set_appbar_state((ABS_AUTOHIDE | ABS_ALWAYSONTOP) as u32);
+    set_appbar_state(ABS_AUTOHIDE | ABS_ALWAYSONTOP);
     hide_all_taskbars();
 }
 
@@ -191,7 +194,7 @@ fn restore_taskbar(old_state: u32) {
 fn get_appbar_state() -> u32 {
     unsafe {
         let mut appbar = APPBARDATA {
-            cbSize: std::mem::size_of::<APPBARDATA>() as u32,
+            cbSize: size_of::<APPBARDATA>() as u32,
             ..Default::default()
         };
 
@@ -202,7 +205,7 @@ fn get_appbar_state() -> u32 {
 fn set_appbar_state(state: u32) {
     unsafe {
         let mut appbar = APPBARDATA {
-            cbSize: std::mem::size_of::<APPBARDATA>() as u32,
+            cbSize: size_of::<APPBARDATA>() as u32,
             ..Default::default()
         };
 
@@ -430,8 +433,8 @@ fn autostart_is_enabled() -> Result<bool, Box<dyn Error>> {
     Ok(output.status.success())
 }
 
-fn yes_no(value: bool) -> &'static str {
-    if value { "yes" } else { "no" }
+fn enabled_or_disabled(value: bool) -> &'static str {
+    if value { "enabled" } else { "disabled" }
 }
 
 fn print_help() {
@@ -443,8 +446,8 @@ Usage:
   {ROOT_COMMAND} hide
   {ROOT_COMMAND} show
   {ROOT_COMMAND} status
-  {ROOT_COMMAND} autostart on
-  {ROOT_COMMAND} autostart off
+  {ROOT_COMMAND} autostart enable
+  {ROOT_COMMAND} autostart disable
   {ROOT_COMMAND} autostart status
   {ROOT_COMMAND} version
   {ROOT_COMMAND} help
@@ -462,10 +465,10 @@ Commands:
       Prints whether the taskbar appears hidden, whether the daemon is running,
       and whether autostart is enabled.
 
-  autostart on
+  autostart enable
       Adds this app to Windows Startup Apps for the current user.
 
-  autostart off
+  autostart disable
       Removes this app from Windows Startup Apps for the current user.
 
   autostart status
